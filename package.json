@@ -1,0 +1,20 @@
+{
+  "name": "bot",
+  "version": "1.0.0",
+  "description": "é um bot para eu dar a bunda",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cu": "node --watch --no-warnings bot.js"
+  },
+  "author": "Leonardo-capy",
+  "license": "ISC",
+  "keywords": [],
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "canvas": "^3.1.0",
+    "discord.js": "^14.18.0",
+    "dotenv": "^16.4.7",
+    "path": "^0.12.7"
+  }
+}
