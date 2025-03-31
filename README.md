@@ -28,3 +28,20 @@ Um bot multifuncional para Discord com integração de IA (Gemini), geração de
 ```bash
 git clone https://github.com/seu-usuario/lucca-bot.git
 cd lucca-bot
+```
+## ⚙️ Configuração
+1. .env:
+```ini
+BOT_TOKEN=seu_token_do_discord
+GEMINI_API_KEY=sua_chave_gemini
+ALLOWED_CHANNELS=id1,id2,id3
+```
+## 🎮 Como Usar
+```bash
+npm start
+//or
+node bot.js
+//or
+npm run cu
+```
+- !lucca [message]
