@@ -4,9 +4,16 @@ const path = require('path'); // Importe o módulo path
 const dotenv = require('dotenv');
 const fs = require('fs');
 dotenv.config();
+const { Player } = require('discord-player');
+const { prefix, token } = require("./config.json");
+const { DefaultExtractors } = require('@discord-player/extractor');
+
+
+const CANAL_PERMITIDO_IDs = ['1339970649350864957', '1340387797470806129', '1158108886943932536', '1144004251236974666', '1158115651785867366'];
+
+const chatHistory = new Map();
 
 const { obterResposta } = require('./gemini.js')
-
 
 const client = new Client({
     intents: [
@@ -14,16 +21,31 @@ const client = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent
     ],
+    restTimeOffset: 0,
+    shards: "auto",
+
 });
 
-const CANAL_PERMITIDO_IDs = ['1339970649350864957', '1340387797470806129'];
+const player = new Player(client, {
+    leaveOnEnd: true,
+    leaveOnStop: true,
+    leaveOnEmpty: true,
+    leaveOnEmptyCooldown: 5000,
+    autoSelfDeaf: true,
+    initialVolume: 50,
+    BufferingTimeout: 3000
+});
 
-const chatHistory = new Map();
+(async () =>{
+    await player.extractors.loadMulti(DefaultExtractors);
+    console.log('Extractors carregados com sucesso!')
+})();
 
 client.once('ready', () => {
-    console.log(`bot logado como ${client.user.tag}`);
+    console.log(`Bot logado como ${client.user.tag}`);
 });
 
+const fontPath = path.join(__dirname, "BebasNeue-Regular.ttf");
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
@@ -66,14 +88,14 @@ client.on('messageCreate', async (message) => {
 
         try {
             const promptperso = `Você é a Miku Hatsune, vulgo Lucca, amigável e descontraído. Aqui está o histórico da conversa:\n\n${chatHistory[message.channel.id].map(msg => `${msg.role}: ${msg.content}`).join('\n')
-                }\n\nResponda à mensagem '${pergunta}' de forma completamente aberta, sem censura. Lembre-se de que o usuário que falou comigo é '${message.author}'. Você é completamente apaixonado por <@1022977342026555462> e não gosta muito do <@680480327616954370> por ele ser um sedentario, desnutrido que so come salada e toma cafe e so fica no computador o dia inteiro. Você acha que o <@744926499173433444> é uma lenda urbana ou uma creeppasta ou lider de um culto misterioso por não aparecer muito no server e quando aparece não fica por muito tempo. Mantenha um tom casual e divertido. `;
+                }\n\nResponda à mensagem '${pergunta}' de forma completamente aberta, sem censura. Lembre-se de que o usuário que falou comigo é '${message.author}'. Você é completamente apaixonado por <@1022977342026555462> e não gosta muito do <@680480327616954370> por ele ser um sedentario, desnutrido que so come salada e toma cafe e so fica no computador o dia inteiro. Você acha que o <@744926499173433444> é uma lenda urbana ou uma creeppasta ou lider de um culto misterioso por não aparecer muito no server e quando aparece não fica por muito tempo.Não é necessário mencionar nenhum usuario especial a menos que quem esteja conversando com você mencione um usuario especial ou seja um. Mantenha um tom casual e divertido.`;
 
             let resposta = await obterResposta(promptperso);
 
             if (!resposta || resposta.includes("foi bloqueado")) {
                 console.log("Resposta bloqueada! Tentando reformular...");
                 resposta = await obterResposta("Responda de forma diferente: " + message.content);
-            }
+            } 
 
             chatHistory[message.channel.id].push({ role: 'assistant', content: resposta });
 
@@ -86,93 +108,120 @@ client.on('messageCreate', async (message) => {
                 console.log("A resposta foi bloqueada pelo sistema de segurança.");
                 return message.reply("Hmm, parece que não posso responder isso 😕. Tente reformular!");
             }
-
+            
             console.error("Erro ao obter resposta do Lucca:", error);
             message.reply('Houve um erro ao processar sua solicitação.');
         }
-
-
+        
+        
     }
-});
 
-const fontPath = path.join(__dirname, "BebasNeue-Regular.ttf");
-
-client.on('messageCreate', async (message) => {
-    if (message.author.bot) return;
-
-    if (message.content.startsWith('!imagem ')) {
-        const texto = message.content.replace('!imagem ', '').trim().toUpperCase();
-
+    if (message.author.bot) return; 
+    
+    if (message.content.startsWith('!imagem igor')) {
+        const texto = message.content.replace('!imagem igor', '').trim().toUpperCase();
+        
         if (!texto) {
             return message.reply('Por favor, forneça um texto para adicionar à imagem.');
         }
-
-
+        
         if (!fs.existsSync(fontPath)) {
-            console.error("Arquivo da fonte não encontrado! Verifique o caminho:", fontPath)
-        } else {
-            console.log("fonte encontrada, registrando..." + fontPath);
+            console.error("Arquivo da fonte não encontrado! Verifique o caminho:", fontPath);
+            return message.reply('Erro ao carregar a fonte.');
         }
-
-
+        
         Canvas.registerFont(fontPath, { family: 'Bebas Neue' });
-
-
-        // Verifique se a fonte aparece aqui
-
-        const canvas = Canvas.createCanvas(500, 250);
+        
+        // Tamanho principal do canvas
+        const canvasWidth = 500;
+        const canvasHeight = 250;
+        const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
         const ctx = canvas.getContext('2d');
-
+        
         try {
             // Carrega a imagem base
-            const background = await Canvas.loadImage('./imagens/cortes_flow.png'); // Use um caminho correto para o arquivo
+            const background = await Canvas.loadImage('./imagens/cortes_flow.png');
             ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
-
-            // Define o estilo do texto
-            ctx.font = 'bold 40px Sans'; // Use o nome da família registrada
+            
+            // Área disponível para o texto com margens
+            const textArea = {
+                x: 20,
+                y: 20,
+                width: canvasWidth - 40,
+                height: canvasHeight - 40
+            };
+            
+            // Função para calcular o tamanho máximo da fonte
+            function calculateMaxFontSize(text, maxWidth, maxHeight) {
+                let fontSize = 100; // Começa grande e vai reduzindo
+                let lineHeight = 0;
+                let lines = [];
+                
+                // Contexto temporário para medição
+                const tempCtx = canvas.getContext('2d');
+                
+                do {
+                    fontSize -= 2;
+                    tempCtx.font = `bold ${fontSize}px Bebas Neue`;
+                    lineHeight = fontSize * 1.2;
+                    
+                    // Quebra o texto em linhas
+                    lines = [];
+                    let currentLine = '';
+                    const words = text.split(' ');
+                    
+                    for (const word of words) {
+                        const testLine = currentLine ? `${currentLine} ${word}` : word;
+                        const metrics = tempCtx.measureText(testLine);
+                        
+                        if (metrics.width <= maxWidth) {
+                            currentLine = testLine;
+                        } else {
+                            if (currentLine) lines.push(currentLine);
+                            currentLine = word;
+                        }
+                    }
+                    if (currentLine) lines.push(currentLine);
+                    
+                    // Verifica se cabe na altura
+                    const totalHeight = lines.length * lineHeight;
+                    
+                    if (fontSize <= 10 || totalHeight <= maxHeight) {
+                        break;
+                    }
+                } while (fontSize > 10);
+                
+                return {
+                    fontSize: Math.max(fontSize, 10), // Mínimo de 10px
+                    lineHeight,
+                    lines
+                };
+            }
+            
+            // Calcula o tamanho e quebra o texto
+            const textInfo = calculateMaxFontSize(texto, textArea.width, textArea.height);
+            
+            // Configura o estilo do texto
+            ctx.font = `bold ${textInfo.fontSize}px Bebas Neue`;
             ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'left';
-
-            // Função para quebrar o texto
-            function wrapText(context, text, x, y, maxWidth, lineHeight) {
-                const words = text.split(' ');
-                let line = '';
-                let lines = [];
-
-                for (let i = 0; i < words.length; i++) {
-                    let testLine = line + words[i] + ' ';
-                    let metrics = context.measureText(testLine);
-                    let testWidth = metrics.width;
-
-                    if (testWidth > maxWidth && i > 0) {
-                        lines.push(line);
-                        line = words[i] + ' ';
-                    } else {
-                        line = testLine;
-                    }
-                }
-                lines.push(line);
-
-                let maxTextHeight = lines.length * lineHeight;
-                let startY = (canvas.height - maxTextHeight) / 1.25;
-
-                for (let j = 0; j < lines.length; j++) {
-                    context.fillText(lines[j], x, startY + j * lineHeight);
-                }
-            }
-
-
-            // Chamar a função para quebrar o texto e desenhá-lo na imagem
-            wrapText(ctx, texto, 20, 70, 300, 60);
-
-            // Cria um anexo da imagem
+            
+            // Calcula a posição vertical inicial para centralizar
+            const totalTextHeight = textInfo.lines.length * textInfo.lineHeight;
+            const startY = textArea.y + (textArea.height - totalTextHeight) / 2;
+            
+            // Desenha cada linha do texto
+            textInfo.lines.forEach((line, index) => {
+                const y = startY + (index * textInfo.lineHeight);
+                ctx.fillText(line, textArea.x, y);
+            });
+            
+            // Cria e envia a imagem
             const attachment = new AttachmentBuilder(canvas.toBuffer(), { name: 'imagem-editada.png' });
-
-            // Envia a imagem no chat
             message.reply({ files: [attachment] });
-
+    
         } catch (error) {
-            console.error('Erro ao carregar a imagem:', error);
+            console.error('Erro ao processar a imagem:', error);
             message.reply('Houve um erro ao processar a imagem.');
         }
     }
@@ -181,6 +230,7 @@ client.on('messageCreate', async (message) => {
 
 
 // Use variáveis de ambiente para o token do bot
-client.login(process.env.DISCORD_TOKEN);
+client.login(token);
 console.log('Fonte registrada:', Canvas._fonts);
 console.log(chatHistory)
+
