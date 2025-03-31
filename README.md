@@ -4,7 +4,7 @@
 
 Um bot multifuncional para Discord com integração de IA (Gemini), geração de imagens e player de música.
 
-<img src="https://i.imgur.com/7X8n5Wg.png" alt="Exemplo de uso" width="500">
+<img src="[https://i.imgur.com/7X8n5Wg.png](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_Mk4nDRbQXOxhSVSWt_7U9_Czppwy33pLeQ&s)" alt="aLucca" width="500">
 
 ## ✨ Funcionalidades Principais
 
