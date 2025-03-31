@@ -5,7 +5,8 @@
   "main": "bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "cu": "node --watch --no-warnings bot.js"
+    "cu": "node --watch --no-warnings bot.js",
+    "start": "bot.js"
   },
   "author": "Leonardo-capy",
   "license": "ISC",
@@ -13,8 +14,20 @@
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "canvas": "^3.1.0",
+    "discord-player": "^7.1.0",
     "discord.js": "^14.18.0",
     "dotenv": "^16.4.7",
-    "path": "^0.12.7"
-  }
+    "ffmpeg-static": "^5.2.0",
+    "i": "^0.3.7",
+    "opusscript": "^0.0.8"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Leonardo-capy/bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Leonardo-capy/bot/issues"
+  },
+  "homepage": "https://github.com/Leonardo-capy/bot#readme"
 }
