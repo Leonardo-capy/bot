@@ -49,6 +49,7 @@ npm run cu
 - !play [url/nome] -> links de spotify
 - !skip
 - !stop
+
 ##📄 Licença
 Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para mais detalhes.
 
