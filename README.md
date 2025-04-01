@@ -52,5 +52,6 @@ npm run cu
 
 ## 📄 Licença
 Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para mais detalhes.
+##
 
 🚀 Desenvolvido com ❤️ por Leonardo-Capy.
