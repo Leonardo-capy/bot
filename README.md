@@ -45,3 +45,11 @@ node bot.js
 npm run cu
 ```
 - !lucca [message]
+- !imagem igor [texto]
+- !play [url/nome] -> links de spotify
+- !skip
+- !stop
+##📄 Licença
+Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para mais detalhes.
+
+🚀 Desenvolvido com ❤️ por Leonardo-Capy.
