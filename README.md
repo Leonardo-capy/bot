@@ -50,7 +50,7 @@ npm run cu
 - !skip
 - !stop
 
-##📄 Licença
+## 📄 Licença
 Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para mais detalhes.
 
 🚀 Desenvolvido com ❤️ por Leonardo-Capy.
